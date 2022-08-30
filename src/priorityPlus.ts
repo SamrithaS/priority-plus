@@ -412,17 +412,17 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
   function onItemsChanged({ detail: { overflowCount } = {} }: CustomEvent<{[x: string]: any}>) {
     updateBtnDisplay(overflowCount > 0);
 
-    let currentMenuItems = Array.from(el?.primary?.[El.PrimaryNav]?.children).concat(
+    const currentMenuItems = Array.from(el?.primary?.[El.PrimaryNav]?.children).concat(
       Array.from(el?.primary[El.OverflowNav]?.children)
     );
 
-    let selectedMenuItem: Element | null =
-      document.querySelector(".current-menu-item");
+    const selectedMenuItem: Element | null =
+      document.querySelector('.current-menu-item');
 
     if (selectedMenuItem) rearrangeSelectedItem(selectedMenuItem);
 
-    currentMenuItems.forEach((item) => {
-      item.addEventListener("click", () => {
+    currentMenuItems.forEach(item => {
+      item.addEventListener('click', () => {
         rearrangeSelectedItem(item);
       });
     });
@@ -464,13 +464,13 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
     }
   }
   function rearrangeSelectedItem(item: Element) {
-    let navItems = el.primary[El.NavItems];
+    const navItems = el.primary[El.NavItems];
     let currentMenuItems = Array.from(el?.primary?.[El.PrimaryNav]?.children).concat(
       Array.from(el?.primary[El.OverflowNav]?.children)
     );
 
-    let clonedItems = document.querySelector(`.p-plus--clone ul`);
-    let itemToRemove = document.querySelector(`.p-plus--clone ul #${item.id}`);
+    const clonedItems = document.querySelector(`.p-plus--clone ul`);
+    const itemToRemove = document.querySelector(`.p-plus--clone ul #${item.id}`);
 
     let indexOfRearrangedItem: number | null = null;
 
@@ -484,12 +484,12 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
         indexOfRearrangedItem = indexT;
       }
     });
-    currentMenuItems.forEach((_) => {
-      if (_.classList.contains("current-menu-item")) {
-        _.classList.remove("current-menu-item");
+    currentMenuItems.forEach(_ => {
+      if (_.classList.contains('current-menu-item')) {
+        _.classList.remove('current-menu-item');
       }
     });
-    item.classList.add("current-menu-item");
+    item.classList.add('current-menu-item');
     if (
       Array.from(el.primary[El.OverflowNav]?.children).includes(item) &&
       Array.from(el.primary[El.PrimaryNav]?.children).length
