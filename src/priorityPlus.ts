@@ -412,6 +412,21 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
   function onItemsChanged({ detail: { overflowCount } = {} }: CustomEvent<{[x: string]: any}>) {
     updateBtnDisplay(overflowCount > 0);
 
+    let currentMenuItems = Array.from(el?.primary?.[El.PrimaryNav]?.children).concat(
+      Array.from(el?.primary[El.OverflowNav]?.children)
+    );
+
+    let selectedMenuItem: Element | null =
+      document.querySelector(".current-menu-item");
+
+    if (selectedMenuItem) rearrangeSelectedItem(selectedMenuItem);
+
+    currentMenuItems.forEach((item) => {
+      item.addEventListener("click", () => {
+        rearrangeSelectedItem(item);
+      });
+    });
+
     if (overflowCount === 0) {
       setOverflowNavOpen(false);
     }
@@ -448,7 +463,78 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
       eventHandler.on(Events.ToggleClicked, toggleOverflowNav, false)
     }
   }
+  function rearrangeSelectedItem(item: Element) {
+    let navItems = el.primary[El.NavItems];
+    let currentMenuItems = Array.from(el?.primary?.[El.PrimaryNav]?.children).concat(
+      Array.from(el?.primary[El.OverflowNav]?.children)
+    );
 
+    let clonedItems = document.querySelector(`.p-plus--clone ul`);
+    let itemToRemove = document.querySelector(`.p-plus--clone ul #${item.id}`);
+
+    let indexOfRearrangedItem: number | null = null;
+
+    navItems.forEach((i, indexT) => {
+      if (
+        i ===
+        Array.from(el.primary[El.PrimaryNav]?.children)[
+          Array.from(el.primary[El.PrimaryNav]?.children).length - 1
+        ]
+      ) {
+        indexOfRearrangedItem = indexT;
+      }
+    });
+    currentMenuItems.forEach((_) => {
+      if (_.classList.contains("current-menu-item")) {
+        _.classList.remove("current-menu-item");
+      }
+    });
+    item.classList.add("current-menu-item");
+    if (
+      Array.from(el.primary[El.OverflowNav]?.children).includes(item) &&
+      Array.from(el.primary[El.PrimaryNav]?.children).length
+    ) {
+      el.primary[El.OverflowNav].removeChild(item);
+      if (
+        itemToRemove &&
+        window.innerWidth < 400 &&
+        item.innerHTML.length > 30
+      ) {
+        clonedItems?.removeChild(itemToRemove);
+        clonedItems?.insertBefore(itemToRemove, clonedItems?.firstChild);
+      }
+
+      let flag = 0;
+
+      navItems.forEach((i, ind) => {
+        if (indexOfRearrangedItem !== null) {
+          if (flag === 1) return;
+
+          if (ind > indexOfRearrangedItem) {
+            if (Array.from(el.primary[El.OverflowNav]?.children).includes(i)) {
+              el.primary[El.OverflowNav].insertBefore(
+                navItems[indexOfRearrangedItem],
+                i
+              );
+              flag = 1;
+              return;
+            }
+            if (flag === 1) return;
+          } else {
+            el.primary[El.OverflowNav].appendChild(
+              navItems[indexOfRearrangedItem]
+            );
+          }
+        }
+      });
+      el.primary[El.PrimaryNav].appendChild(item);
+    }
+
+    currentMenuItems = Array.from(el.primary[El.PrimaryNav]?.children).concat(
+      Array.from(el.primary[El.OverflowNav]?.children)
+    );
+    setOverflowNavOpen(false);
+  }
   /**
    * Remove listeners and attempt to reset the DOM.
    */
