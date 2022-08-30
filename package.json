@@ -1,7 +1,7 @@
 {
-  "name": "priority-plus",
-  "version": "0.0.0-semantically-released",
-  "description": "A modern implementation of the priority plus navigation pattern.",
+  "name": "priority-plus-selected",
+  "version": "0.0.1",
+  "description": "A modern implementation of the priority plus navigation pattern along with selected item handling",
   "type": "module",
   "module": "dist/priority-plus.esm.js",
   "browser": "dist/priority-plus.js",
@@ -24,7 +24,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jayfreestone/priority-plus.git"
+    "url": "git+https://github.com/SamrithaS/priority-plus"
   },
   "author": {
     "name": "Jay Freestone",
@@ -33,9 +33,9 @@
   },
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/jayfreestone/priority-plus/issues"
+    "url": "https://github.com/SamrithaS/priority-plus/issues"
   },
-  "homepage": "https://github.com/jayfreestone/priority-plus#readme",
+  "homepage": "https://github.com/samrithas/priority-plus#readme",
   "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.13.14",
@@ -68,7 +68,7 @@
     }
   ],
   "release": {
-    "branches": ["master"],
+    "branches": ["rearrange-selected-nav-item"],
     "plugins": [
       "@semantic-release/commit-analyzer",
       "@semantic-release/release-notes-generator",
