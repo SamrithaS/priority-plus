@@ -1,6 +1,6 @@
 {
   "name": "priority-plus-selected",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A modern implementation of the priority plus navigation pattern along with selected item handling",
   "type": "module",
   "module": "dist/priority-plus.esm.js",
