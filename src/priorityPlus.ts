@@ -401,6 +401,7 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
    */
   function onToggleClick(e: Event) {
     e.preventDefault();
+    e.stopPropagation();
     eventHandler.trigger(
       createToggleClickedEvent({ original: e })
     );
@@ -456,6 +457,13 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
     el.clone[El.NavItems].forEach(elem => inst.observer.observe(elem));
 
     el.primary[El.ToggleBtn].addEventListener('click', onToggleClick);
+    document.addEventListener("click", handleOutsideClick);
+    document
+      .querySelector(".p-plus__primary-wrapper")
+      ?.addEventListener("click", (event) => stopEventPropogation(event));
+
+
+    document.body.addEventListener('click', ()=>console.log('clicked'));
 
     eventHandler.on(Events.ItemsChanged, onItemsChanged, false);
 
@@ -463,6 +471,14 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
       eventHandler.on(Events.ToggleClicked, toggleOverflowNav, false)
     }
   }
+  function handleOutsideClick() {
+    setOverflowNavOpen(false);
+  }
+
+  function stopEventPropogation(event) {
+    event.stopPropagation();
+  }
+  
   function rearrangeSelectedItem(item: Element) {
     const navItems = el.primary[El.NavItems];
     let currentMenuItems = Array.from(el?.primary?.[El.PrimaryNav]?.children).concat(
@@ -497,11 +513,12 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
       el.primary[El.OverflowNav].removeChild(item);
       if (
         itemToRemove &&
-        window.innerWidth < 400 &&
         item.innerHTML.length > 30
       ) {
         clonedItems?.removeChild(itemToRemove);
-        clonedItems?.insertBefore(itemToRemove, clonedItems?.firstChild);
+        clonedItems?.insertBefore(itemToRemove, clonedItems?.children[
+          Array.from(el.primary[El.PrimaryNav]?.children).length - 1
+        ]);
       }
 
       let flag = 0;
@@ -542,6 +559,7 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
     if (inst.observer) inst.observer.disconnect();
 
     el.primary[El.ToggleBtn].removeEventListener('click', onToggleClick);
+    
 
     // Unhook instance based event listeners
     Array.from(inst.eventListeners.entries())
