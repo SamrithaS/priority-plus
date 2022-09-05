@@ -92,3 +92,15 @@
 .p-plus__toggle-btn {
   flex-shrink: 0;
 }
+
+@media screen and (max-width: 600px) {
+  .p-plus--clone .width-increase{
+    width:600px; 
+  }
+}
+@media screen and (max-width: 1000px){
+  .p-plus--clone .width-increase{
+    width:1000px; 
+  }
+}
+
