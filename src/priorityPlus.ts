@@ -69,6 +69,8 @@ interface Options {
   defaultOverflowVisible: boolean;
   openOnToggle: boolean;
   innerToggleTemplate: string|((args: object) => string);
+  showSelectedMenuItem: boolean;
+  collapseWidth: number;
 }
 
 const defaultOptions: Options = {
@@ -85,6 +87,8 @@ const defaultOptions: Options = {
   openOnToggle: true,
   defaultOverflowVisible: false,
   innerToggleTemplate: 'More',
+  showSelectedMenuItem: true,
+  collapseWidth: 420
 };
 
 function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options> = {}) {
@@ -420,6 +424,8 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
     const selectedMenuItem: Element | null =
       document.querySelector('.current-menu-item');
 
+    if (options.showSelectedMenuItem) {
+
     if (selectedMenuItem) rearrangeSelectedItem(selectedMenuItem);
 
     currentMenuItems.forEach(item => {
@@ -427,6 +433,7 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
         rearrangeSelectedItem(item);
       });
     });
+  }
 
     if (overflowCount === 0) {
       setOverflowNavOpen(false);
@@ -457,13 +464,14 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
     el.clone[El.NavItems].forEach(elem => inst.observer.observe(elem));
 
     el.primary[El.ToggleBtn].addEventListener('click', onToggleClick);
+
     document.addEventListener("click", handleOutsideClick);
     document
       .querySelector(".p-plus__primary-wrapper")
       ?.addEventListener("click", (event) => stopEventPropogation(event));
 
 
-    document.body.addEventListener('click', ()=>console.log('clicked'));
+    window.addEventListener("resize", convertToSingleMenu);
 
     eventHandler.on(Events.ItemsChanged, onItemsChanged, false);
 
@@ -473,6 +481,15 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
   }
   function handleOutsideClick() {
     setOverflowNavOpen(false);
+  }
+  function convertToSingleMenu() {
+    let clonedItems = document.querySelector(`.p-plus--clone ul`);
+
+    if (window.innerWidth < options.collapseWidth) {
+      clonedItems?.children[0]?.classList.add("width-increase");
+    } else {
+      clonedItems?.children[0]?.classList.remove("width-increase");
+    }
   }
 
   function stopEventPropogation(event) {
