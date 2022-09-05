@@ -219,19 +219,6 @@ priorityPlus(document.querySelector('.js-p-target'), {
 
 `showSelectedMenuItem` is true by default.
 
-### `collapseWidth`
-
-`collapseWidth` is the minimum width for which all the menu items would condense into a single menu icon - which is commonly used in mobiles,
-
-```javascript
-priorityPlus(document.querySelector('.js-p-target'), {
-  collapseWidth: 360,
-});
-```
-
-`collapseWidth`'s value is 420 by default.
-
-
 ### Classes
 If you'd like to override the default classes, you can pass in a `classNames` object like so:
 

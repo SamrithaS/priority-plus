@@ -70,7 +70,6 @@ interface Options {
   openOnToggle: boolean;
   innerToggleTemplate: string|((args: object) => string);
   showSelectedMenuItem: boolean;
-  collapseWidth: number;
 }
 
 const defaultOptions: Options = {
@@ -88,7 +87,6 @@ const defaultOptions: Options = {
   defaultOverflowVisible: false,
   innerToggleTemplate: 'More',
   showSelectedMenuItem: true,
-  collapseWidth: 420
 };
 
 function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options> = {}) {
@@ -470,9 +468,6 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
       .querySelector(".p-plus__primary-wrapper")
       ?.addEventListener("click", (event) => stopEventPropogation(event));
 
-
-    window.addEventListener("resize", convertToSingleMenu);
-
     eventHandler.on(Events.ItemsChanged, onItemsChanged, false);
 
     if (options.openOnToggle) {
@@ -481,15 +476,6 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
   }
   function handleOutsideClick() {
     setOverflowNavOpen(false);
-  }
-  function convertToSingleMenu() {
-    let clonedItems = document.querySelector(`.p-plus--clone ul`);
-
-    if (window.innerWidth < options.collapseWidth) {
-      clonedItems?.children[0]?.classList.add("width-increase");
-    } else {
-      clonedItems?.children[0]?.classList.remove("width-increase");
-    }
   }
 
   function stopEventPropogation(event) {
