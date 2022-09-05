@@ -726,3 +726,9 @@
   position: absolute;
   top: 0;
 }
+
+@media (max-width: 420px) {
+  .p-plus__primary > li:first-child {
+    width: 100%;
+  }
+}
