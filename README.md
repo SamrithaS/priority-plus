@@ -14,7 +14,7 @@ You can see a demo on the [landing page](https://jayfreestone.github.io/priority
 There's also a Glitch pen [available here](https://priority-plus-demo.glitch.me/#) with a different, alternatively styled example. Check out the [source](https://glitch.com/edit/#!/priority-plus-demo).
 
 **Displaying of selected item**:
-The aim is to highlight selected menu item even if the item exists inside the dropdown, the solution to this is by interchanging the selected item with the last item in the priority nav. The item, if not selected anymore will revert back to it's original position.
+The aim is to highlight the currently selected menu item even if the item exists inside the overflow nav, the solution to this is by interchanging the selected item with the last item in the priority nav. The item, if not selected anymore will revert back to it's original position. This behaviour is enabled by default and can be disabled if needed.
 
 ![Animation showing selected items being rearranged](docs/img/selected-menu-item.gif)
 
