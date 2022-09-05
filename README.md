@@ -5,13 +5,19 @@
 ![npm bundle size](https://img.shields.io/bundlephobia/minzip/priority-plus.svg?color=%234263eb&style=flat-square)
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg?style=flat-square)](https://github.com/semantic-release/semantic-release)
 
-A modern implementation of the [priority plus](https://css-tricks.com/the-priority-navigation-pattern/) navigation pattern.
+A modern implementation of the [priority plus](https://css-tricks.com/the-priority-navigation-pattern/) navigation pattern, which also displays the selected menu item.
 
 ![Animation showing nav items moving to and from the overflow nav.](docs/img/nav-demo.gif)
 
 You can see a demo on the [landing page](https://jayfreestone.github.io/priority-plus/).
 
 There's also a Glitch pen [available here](https://priority-plus-demo.glitch.me/#) with a different, alternatively styled example. Check out the [source](https://glitch.com/edit/#!/priority-plus-demo).
+
+**Displaying of selected item **:
+The aim is to highlight selected menu item even if the item exists inside the dropdown, the solution to this is by interchanging the selected item with the last item in the priority nav. The item, if not selected anymore will revert back to it's original position.
+
+![Animation showing selected items being rearranged](docs/img/selected-menu-item.gif)
+
 
 **The short stuff**:
 
@@ -200,6 +206,31 @@ priorityPlus(document.querySelector('.js-p-target'), {
 ```
 
 The above will move all menu items into the overflow if only two can 'fit' into the primary. This is essentially a way to avoid orphan nav items.
+
+### `showSelectedMenuItem`
+
+If you'd like to disable the rearrangement of items in order to highlight the selected item, you can do it with the boolean `showSelectedMenuItem`,
+
+```javascript
+priorityPlus(document.querySelector('.js-p-target'), {
+  showSelectedMenuItem: false,
+});
+```
+
+`showSelectedMenuItem` is true by default.
+
+### `collapseWidth`
+
+`collapseWidth` is the minimum width for which all the menu items would condense into a single menu icon - which is commonly used in mobiles,
+
+```javascript
+priorityPlus(document.querySelector('.js-p-target'), {
+  collapseWidth: 360,
+});
+```
+
+`collapseWidth`'s value is 420 by default.
+
 
 ### Classes
 If you'd like to override the default classes, you can pass in a `classNames` object like so:
