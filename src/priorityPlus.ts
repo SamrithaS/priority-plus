@@ -4,29 +4,31 @@ import {
   createShowOverflowEvent,
   createToggleClickedEvent,
   Events,
-} from './events/createEvent';
-import createEventHandler from './events/eventHandler';
-import DeepPartial from './types/DeepPartial';
-import createMirror from './utils/createMirror';
-import processTemplate from './utils/processTemplate';
-import validateAndThrow from './validation';
+} from "./events/createEvent";
+import createEventHandler from "./events/eventHandler";
+import DeepPartial from "./types/DeepPartial";
+import createMirror from "./utils/createMirror";
+import processTemplate from "./utils/processTemplate";
+import validateAndThrow from "./validation";
 
 enum El {
-  Container = 'container',
-  Main = 'main',
-  PrimaryNavWrapper = 'primary-nav-wrapper',
-  PrimaryNav = 'primary-nav',
-  OverflowNav = 'overflow-nav',
-  ToggleBtn = 'toggle-btn',
-  NavItems = 'nav-item',
+  Container = "container",
+  Main = "main",
+  PrimaryNavWrapper = "primary-nav-wrapper",
+  PrimaryNav = "primary-nav",
+  OverflowNav = "overflow-nav",
+  ToggleBtn = "toggle-btn",
+  NavItems = "nav-item",
+  SelectedItem = "selected-item",
+  ClonedItems = "cloned-items",
 }
 
 type NavType = El.PrimaryNav | El.OverflowNav;
 
 enum StateModifiers {
-  ButtonVisible = 'is-showing-toggle',
-  OverflowVisible = 'is-showing-overflow',
-  PrimaryHidden = 'is-hiding-primary',
+  ButtonVisible = "is-showing-toggle",
+  OverflowVisible = "is-showing-overflow",
+  PrimaryHidden = "is-hiding-primary",
 }
 
 interface ElementRefs {
@@ -43,15 +45,20 @@ interface ElementRefs {
     [El.NavItems]: HTMLLIElement[];
     [El.OverflowNav]: HTMLElement;
     [El.ToggleBtn]: HTMLElement;
+    [El.SelectedItem]: HTMLElement;
+    [El.ClonedItems]: HTMLElement[];
   };
 }
 
 interface Instance {
-  eventListeners: Map<((eventDetail: CustomEvent<{}>) => void), {
-    eventType: Events;
-    wrappedCallback: (eventDetail: CustomEvent<{}>) => void;
-  }>;
-  itemMap: WeakMap<HTMLElement|Element, NavType>;
+  eventListeners: Map<
+    (eventDetail: CustomEvent<{}>) => void,
+    {
+      eventType: Events;
+      wrappedCallback: (eventDetail: CustomEvent<{}>) => void;
+    }
+  >;
+  itemMap: WeakMap<HTMLElement | Element, NavType>;
   observer: IntersectionObserver;
 }
 
@@ -64,32 +71,37 @@ interface Options {
     [El.OverflowNav]: string[];
     [El.ToggleBtn]: string[];
     [El.NavItems]: string[];
+    [El.SelectedItem]: string[];
   };
   collapseAtCount: number;
   defaultOverflowVisible: boolean;
   openOnToggle: boolean;
-  innerToggleTemplate: string|((args: object) => string);
+  innerToggleTemplate: string | ((args: object) => string);
   showSelectedMenuItem: boolean;
 }
 
 const defaultOptions: Options = {
   classNames: {
-    [El.Container]: ['p-plus-container'],
-    [El.Main]: ['p-plus'],
-    [El.PrimaryNavWrapper]: ['p-plus__primary-wrapper'],
-    [El.PrimaryNav]: ['p-plus__primary'],
-    [El.OverflowNav]: ['p-plus__overflow'],
-    [El.ToggleBtn]: ['p-plus__toggle-btn'],
-    [El.NavItems]: ['p-plus__primary-nav-item'],
+    [El.Container]: ["p-plus-container"],
+    [El.Main]: ["p-plus"],
+    [El.PrimaryNavWrapper]: ["p-plus__primary-wrapper"],
+    [El.PrimaryNav]: ["p-plus__primary"],
+    [El.OverflowNav]: ["p-plus__overflow"],
+    [El.ToggleBtn]: ["p-plus__toggle-btn"],
+    [El.NavItems]: ["p-plus__primary-nav-item"],
+    [El.SelectedItem]: ["current-menu-item"],
   },
   collapseAtCount: -1,
   openOnToggle: true,
   defaultOverflowVisible: false,
-  innerToggleTemplate: 'More',
+  innerToggleTemplate: "More",
   showSelectedMenuItem: true,
 };
 
-function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options> = {}) {
+function priorityPlus(
+  targetElem: HTMLElement,
+  userOptions: DeepPartial<Options> = {}
+) {
   /**
    * @todo: We shouldn't have to cast this as Options, however DeepPartial creates
    * breaks the type of innerToggleTemplate (?).
@@ -135,7 +147,7 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
    * Generates classes based on an element name.
    */
   function cn(key: El): string {
-    return classNames[key].join(' ');
+    return classNames[key].join(" ");
   }
 
   /**
@@ -152,7 +164,9 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
   function createMarkup(): string {
     return `
       <div ${dv(El.Main)} class="${cn(El.Main)}">
-        <div class="${cn(El.PrimaryNavWrapper)}" ${dv(El.PrimaryNavWrapper)}></div>
+        <div class="${cn(El.PrimaryNavWrapper)}" ${dv(
+      El.PrimaryNavWrapper
+    )}></div>
         <button
           ${dv(El.ToggleBtn)}
           class="${cn(El.ToggleBtn)}"
@@ -177,7 +191,7 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
     enhanceOriginalMenu(targetClone);
 
     const navItems = Array.from(targetClone.children) as HTMLLIElement[];
-    navItems.forEach(enhanceOriginalNavItem)
+    navItems.forEach(enhanceOriginalNavItem);
 
     return targetClone;
   }
@@ -186,16 +200,16 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
    * Enhance the original list element with classes/attributes.
    */
   function enhanceOriginalMenu(elem: HTMLElement) {
-    elem.classList.add(...classNames[El.PrimaryNav])
-    elem.setAttribute(dv(El.PrimaryNav), '');
+    elem.classList.add(...classNames[El.PrimaryNav]);
+    elem.setAttribute(dv(El.PrimaryNav), "");
   }
 
   /**
    * Enhance an original menu list-item with classes/attributes.
    */
   function enhanceOriginalNavItem(elem: HTMLLIElement) {
-    elem.classList.add(...classNames[El.NavItems])
-    elem.setAttribute(dv(El.NavItems), '');
+    elem.classList.add(...classNames[El.NavItems]);
+    elem.setAttribute(dv(El.NavItems), "");
   }
 
   /**
@@ -204,40 +218,61 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
   function setupEl() {
     const { itemMap } = inst;
     const markup = createMarkup();
-    const container = document.createElement('div');
+    const container = document.createElement("div");
     container.classList.add(...classNames[El.Container]);
-    container.setAttribute(dv(El.Container), 'true');
+    container.setAttribute(dv(El.Container), "true");
     el[El.Container] = container;
 
     const original = document.createRange().createContextualFragment(markup);
 
     // Setup the wrapper and clone/enhance the original menu.
-    el.primary[El.PrimaryNavWrapper] = original.querySelector(`[${dv(El.PrimaryNavWrapper)}]`) as HTMLElement;
-    el.primary[El.PrimaryNavWrapper].appendChild(cloneNav(targetElem))
+    el.primary[El.PrimaryNavWrapper] = original.querySelector(
+      `[${dv(El.PrimaryNavWrapper)}]`
+    ) as HTMLElement;
+    el.primary[El.PrimaryNavWrapper].appendChild(cloneNav(targetElem));
 
     const cloned = original.cloneNode(true) as Element;
 
     // Establish references. By this point the menu is fully built.
-    el.primary[El.Main] = original.querySelector(`[${dv(El.Main)}]`) as HTMLElement;
-    el.primary[El.PrimaryNav] = original.querySelector(`[${dv(El.PrimaryNav)}]`) as HTMLElement;
-    el.primary[El.NavItems] = Array.from(original.querySelectorAll(`[${dv(El.NavItems)}]`)) as HTMLLIElement[];
-    el.primary[El.OverflowNav] = original.querySelector(`[${dv(El.OverflowNav)}]`) as HTMLElement;
-    el.primary[El.ToggleBtn] = original.querySelector(`[${dv(El.ToggleBtn)}]`) as HTMLElement;
+    el.primary[El.Main] = original.querySelector(
+      `[${dv(El.Main)}]`
+    ) as HTMLElement;
+    el.primary[El.PrimaryNav] = original.querySelector(
+      `[${dv(El.PrimaryNav)}]`
+    ) as HTMLElement;
+    el.primary[El.NavItems] = Array.from(
+      original.querySelectorAll(`[${dv(El.NavItems)}]`)
+    ) as HTMLLIElement[];
+    el.primary[El.OverflowNav] = original.querySelector(
+      `[${dv(El.OverflowNav)}]`
+    ) as HTMLElement;
+    el.primary[El.ToggleBtn] = original.querySelector(
+      `[${dv(El.ToggleBtn)}]`
+    ) as HTMLElement;
+    el.primary[El.SelectedItem] = original.querySelector(
+      `${cn(El.SelectedItem)}`
+    ) as HTMLElement;
 
     el.clone[El.Main] = cloned.querySelector(`[${dv(El.Main)}]`) as HTMLElement;
-    el.clone[El.NavItems] = Array.from(cloned.querySelectorAll(`[${dv(El.NavItems)}]`)) as HTMLElement[];
-    el.clone[El.ToggleBtn] = cloned.querySelector(`[${dv(El.ToggleBtn)}]`) as HTMLElement;
-    el.clone[El.Main].setAttribute('aria-hidden', 'true');
-    el.clone[El.Main].setAttribute('data-clone', 'true');
+    el.clone[El.NavItems] = Array.from(
+      cloned.querySelectorAll(`[${dv(El.NavItems)}]`)
+    ) as HTMLElement[];
+    el.clone[El.ToggleBtn] = cloned.querySelector(
+      `[${dv(El.ToggleBtn)}]`
+    ) as HTMLElement;
+    el.clone[El.Main].setAttribute("aria-hidden", "true");
+    el.clone[El.Main].setAttribute("data-clone", "true");
     el.clone[El.Main].classList.add(`${classNames[El.Main][0]}--clone`);
-    el.clone[El.Main].classList.add(`${classNames[El.Main][0]}--${StateModifiers.ButtonVisible}`);
+    el.clone[El.Main].classList.add(
+      `${classNames[El.Main][0]}--${StateModifiers.ButtonVisible}`
+    );
 
     container.appendChild(original);
     container.appendChild(cloned);
 
     // By default every item belongs in the primary nav, since the intersection
     // observer will run on-load anyway.
-    el.clone[El.NavItems].forEach(item => itemMap.set(item, El.PrimaryNav));
+    el.clone[El.NavItems].forEach((item) => itemMap.set(item, El.PrimaryNav));
 
     const parent = targetElem.parentNode as HTMLElement;
     parent.replaceChild(container, targetElem);
@@ -247,13 +282,13 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
    * Sets the toggle button visibility.
    */
   function updateBtnDisplay(show: boolean = true) {
-    el.primary[El.Main].classList[show ? 'add' : 'remove'](
-      `${classNames[El.Main][0]}--${StateModifiers.ButtonVisible}`,
+    el.primary[El.Main].classList[show ? "add" : "remove"](
+      `${classNames[El.Main][0]}--${StateModifiers.ButtonVisible}`
     );
 
-    if (typeof options.innerToggleTemplate !== 'string') {
+    if (typeof options.innerToggleTemplate !== "string") {
       // We need to do it for both, as layout is affected
-      [el.primary[El.ToggleBtn], el.clone[El.ToggleBtn]].forEach(btn => {
+      [el.primary[El.ToggleBtn], el.clone[El.ToggleBtn]].forEach((btn) => {
         btn.innerHTML = processTemplate(options.innerToggleTemplate, {
           toggleCount: el.primary[El.OverflowNav].children.length,
           totalCount: el.clone[El.NavItems].length,
@@ -269,7 +304,9 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
     const { itemMap } = inst;
     // Always use the clone as the base for our new nav,
     // since the order is canonical and it is never filtered.
-    return el.clone[El.NavItems].filter(item => itemMap.get(item) === navType);
+    return el.clone[El.NavItems].filter(
+      (item) => itemMap.get(item) === navType
+    );
   }
 
   /**
@@ -301,15 +338,14 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
   function generateNav(navType: NavType): HTMLElement {
     const newNav = el.primary[navType].cloneNode();
 
-    getRenderableItems(navType)
-      .forEach(item => {
-        const elem = getElemMirror(
-          el.clone[El.NavItems],
-          el.primary[El.NavItems],
-        ).get(item) as HTMLElement;
+    getRenderableItems(navType).forEach((item) => {
+      const elem = getElemMirror(
+        el.clone[El.NavItems],
+        el.primary[El.NavItems]
+      ).get(item) as HTMLElement;
 
-        newNav.appendChild(elem);
-      });
+      newNav.appendChild(elem);
+    });
 
     return newNav as HTMLElement;
   }
@@ -322,10 +358,7 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
     const parent = el.primary[navType].parentNode as HTMLElement;
 
     // Replace the existing nav element in the DOM
-    parent.replaceChild(
-      newNav,
-      el.primary[navType],
-    );
+    parent.replaceChild(newNav, el.primary[navType]);
 
     // Update our reference to it
     el.primary[navType] = newNav;
@@ -335,8 +368,14 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
    * Run every time a nav item intersects with the parent container.
    * We use this opportunity to check which type of nav the items belong to.
    */
-  function onIntersect({ target, intersectionRatio }: IntersectionObserverEntry) {
-    inst.itemMap.set(target, intersectionRatio < 0.99 ? El.OverflowNav : El.PrimaryNav);
+  function onIntersect({
+    target,
+    intersectionRatio,
+  }: IntersectionObserverEntry) {
+    inst.itemMap.set(
+      target,
+      intersectionRatio < 0.99 ? El.OverflowNav : El.PrimaryNav
+    );
   }
 
   /**
@@ -349,9 +388,11 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
     // Update the navs to reflect the new changes
     ([El.PrimaryNav, El.OverflowNav] as NavType[]).forEach(updateNav);
 
-    eventHandler.trigger(createItemsChangedEvent({
-      overflowCount: el.primary[El.OverflowNav].children.length,
-    }));
+    eventHandler.trigger(
+      createItemsChangedEvent({
+        overflowCount: el.primary[El.OverflowNav].children.length,
+      })
+    );
 
     /**
      * Once this callback is run, we can be confident that we are ready to pass on
@@ -366,13 +407,21 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
    * Sets the visibility of the overflow navigation.
    */
   function setOverflowNavOpen(open = true) {
-    const openClass = `${classNames[El.Main][0]}--${StateModifiers.OverflowVisible}`;
-    el.primary[El.Main].classList[open ? 'add' : 'remove'](openClass);
-    el.primary[El.OverflowNav].setAttribute('aria-hidden', open ? 'false' : 'true');
-    el.primary[El.ToggleBtn].setAttribute('aria-expanded', open ? 'true' : 'false');
+    const openClass = `${classNames[El.Main][0]}--${
+      StateModifiers.OverflowVisible
+    }`;
+    el.primary[El.Main].classList[open ? "add" : "remove"](openClass);
+    el.primary[El.OverflowNav].setAttribute(
+      "aria-hidden",
+      open ? "false" : "true"
+    );
+    el.primary[El.ToggleBtn].setAttribute(
+      "aria-expanded",
+      open ? "true" : "false"
+    );
 
     eventHandler.trigger(
-      open ? createShowOverflowEvent() : createHideOverflowEvent(),
+      open ? createShowOverflowEvent() : createHideOverflowEvent()
     );
 
     return this;
@@ -382,7 +431,9 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
    * Toggles the visibility of the overflow navigation.
    */
   function toggleOverflowNav() {
-    const openClass = `${classNames[El.Main][0]}--${StateModifiers.OverflowVisible}`;
+    const openClass = `${classNames[El.Main][0]}--${
+      StateModifiers.OverflowVisible
+    }`;
     setOverflowNavOpen(!el.primary[El.Main].classList.contains(openClass));
 
     return this;
@@ -393,9 +444,11 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
    * when all the navigation items are hidden in the overflow nav).
    */
   function setPrimaryHidden(hidden = true) {
-    const hiddenClass = `${classNames[El.Main][0]}--${StateModifiers.PrimaryHidden}`;
-    el.primary[El.Main].classList[hidden ? 'add' : 'remove'](hiddenClass);
-    el.primary[El.PrimaryNav].setAttribute('aria-hidden', String(hidden));
+    const hiddenClass = `${classNames[El.Main][0]}--${
+      StateModifiers.PrimaryHidden
+    }`;
+    el.primary[El.Main].classList[hidden ? "add" : "remove"](hiddenClass);
+    el.primary[El.PrimaryNav].setAttribute("aria-hidden", String(hidden));
   }
 
   /**
@@ -404,34 +457,31 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
   function onToggleClick(e: Event) {
     e.preventDefault();
     e.stopPropagation();
-    eventHandler.trigger(
-      createToggleClickedEvent({ original: e })
-    );
+    eventHandler.trigger(createToggleClickedEvent({ original: e }));
   }
 
   /**
    * Callback for when either nav is updated.
    */
-  function onItemsChanged({ detail: { overflowCount } = {} }: CustomEvent<{[x: string]: any}>) {
+  function onItemsChanged({
+    detail: { overflowCount } = {},
+  }: CustomEvent<{ [x: string]: any }>) {
     updateBtnDisplay(overflowCount > 0);
 
-    const currentMenuItems = Array.from(el?.primary?.[El.PrimaryNav]?.children).concat(
-      Array.from(el?.primary[El.OverflowNav]?.children)
-    );
-
-    const selectedMenuItem: Element | null =
-      document.querySelector('.current-menu-item');
+    const currentMenuItems = Array.from(
+      el?.primary?.[El.PrimaryNav]?.children
+    ).concat(Array.from(el?.primary[El.OverflowNav]?.children));
 
     if (options.showSelectedMenuItem) {
+      if (el.primary[El.SelectedItem])
+        rearrangeSelectedItem(el.primary[El.SelectedItem]);
 
-    if (selectedMenuItem) rearrangeSelectedItem(selectedMenuItem);
-
-    currentMenuItems.forEach(item => {
-      item.addEventListener('click', () => {
-        rearrangeSelectedItem(item);
+      currentMenuItems.forEach((item) => {
+        item.addEventListener("click", () => {
+          rearrangeSelectedItem(item);
+        });
       });
-    });
-  }
+    }
 
     if (overflowCount === 0) {
       setOverflowNavOpen(false);
@@ -446,7 +496,7 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
   function getNavElements() {
     // Clone it to avoid users changing the el references,
     // e.g. inst.getNavElements()['toggle-btn'] = null;
-    return {...el.primary};
+    return { ...el.primary };
   }
 
   /**
@@ -455,23 +505,24 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
   function bindListeners() {
     inst.observer = new IntersectionObserver(intersectionCallback, {
       root: el.clone[El.Main],
-      rootMargin: '0px 0px 0px 0px',
+      rootMargin: "0px 0px 0px 0px",
       threshold: [0.99],
     });
 
-    el.clone[El.NavItems].forEach(elem => inst.observer.observe(elem));
+    el.clone[El.NavItems].forEach((elem) => inst.observer.observe(elem));
 
-    el.primary[El.ToggleBtn].addEventListener('click', onToggleClick);
+    el.primary[El.ToggleBtn].addEventListener("click", onToggleClick);
 
     document.addEventListener("click", handleOutsideClick);
-    document
-      .querySelector(".p-plus__primary-wrapper")
-      ?.addEventListener("click", (event) => stopEventPropogation(event));
+
+    el.primary[El.PrimaryNavWrapper]?.addEventListener("click", (event) =>
+      stopEventPropogation(event)
+    );
 
     eventHandler.on(Events.ItemsChanged, onItemsChanged, false);
 
     if (options.openOnToggle) {
-      eventHandler.on(Events.ToggleClicked, toggleOverflowNav, false)
+      eventHandler.on(Events.ToggleClicked, toggleOverflowNav, false);
     }
   }
   function handleOutsideClick() {
@@ -481,15 +532,17 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
   function stopEventPropogation(event) {
     event.stopPropagation();
   }
-  
+
   function rearrangeSelectedItem(item: Element) {
     const navItems = el.primary[El.NavItems];
-    let currentMenuItems = Array.from(el?.primary?.[El.PrimaryNav]?.children).concat(
-      Array.from(el?.primary[El.OverflowNav]?.children)
-    );
+    let currentMenuItems = Array.from(
+      el?.primary?.[El.PrimaryNav]?.children
+    ).concat(Array.from(el?.primary[El.OverflowNav]?.children));
 
-    const clonedItems = document.querySelector(`.p-plus--clone ul`);
-    const itemToRemove = document.querySelector(`.p-plus--clone ul #${item.id}`);
+    const clonedItems = document.querySelector(`${cn(El.ClonedItems)} ul`);
+    const itemToRemove = document.querySelector(
+      `${cn(El.ClonedItems)} ul #${item.id}`
+    );
 
     let indexOfRearrangedItem: number | null = null;
 
@@ -503,25 +556,25 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
         indexOfRearrangedItem = indexT;
       }
     });
-    currentMenuItems.forEach(_ => {
-      if (_.classList.contains('current-menu-item')) {
-        _.classList.remove('current-menu-item');
+    currentMenuItems.forEach((_) => {
+      if (_.classList.contains(`${cn(El.SelectedItem)}`)) {
+        _.classList.remove(`${cn(El.SelectedItem)}`);
       }
     });
-    item.classList.add('current-menu-item');
+    item.classList.add(`${cn(El.SelectedItem)}`);
     if (
       Array.from(el.primary[El.OverflowNav]?.children).includes(item) &&
       Array.from(el.primary[El.PrimaryNav]?.children).length
     ) {
       el.primary[El.OverflowNav].removeChild(item);
-      if (
-        itemToRemove &&
-        item.innerHTML.length > 30
-      ) {
+      if (itemToRemove && item.innerHTML.length > 30) {
         clonedItems?.removeChild(itemToRemove);
-        clonedItems?.insertBefore(itemToRemove, clonedItems?.children[
-          Array.from(el.primary[El.PrimaryNav]?.children).length - 1
-        ]);
+        clonedItems?.insertBefore(
+          itemToRemove,
+          clonedItems?.children[
+            Array.from(el.primary[El.PrimaryNav]?.children).length - 1
+          ]
+        );
       }
 
       let flag = 0;
@@ -561,14 +614,12 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
   function destroy() {
     if (inst.observer) inst.observer.disconnect();
 
-    el.primary[El.ToggleBtn].removeEventListener('click', onToggleClick);
-    
+    el.primary[El.ToggleBtn].removeEventListener("click", onToggleClick);
 
     // Unhook instance based event listeners
-    Array.from(inst.eventListeners.entries())
-      .forEach(([cb, { eventType }]) => {
-        eventHandler.off(eventType, cb);
-      });
+    Array.from(inst.eventListeners.entries()).forEach(([cb, { eventType }]) => {
+      eventHandler.off(eventType, cb);
+    });
 
     // Attempt to reset the DOM back to how it was
     const parent = el[El.Container].parentNode as HTMLElement;
@@ -580,7 +631,7 @@ function priorityPlus(targetElem: HTMLElement, userOptions: DeepPartial<Options>
     setupEl();
     bindListeners();
     if (options.defaultOverflowVisible) setOverflowNavOpen(true);
-  }());
+  })();
 
   return {
     destroy,
