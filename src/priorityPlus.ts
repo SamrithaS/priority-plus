@@ -539,9 +539,9 @@ function priorityPlus(
       el?.primary?.[El.PrimaryNav]?.children
     ).concat(Array.from(el?.primary[El.OverflowNav]?.children));
 
-    const clonedItems = document.querySelector(`${cn(El.ClonedItems)} ul`);
+    const clonedItems = document.querySelector(`${targetElem.className} ${cn(El.ClonedItems)} ul`);
     const itemToRemove = document.querySelector(
-      `${cn(El.ClonedItems)} ul #${item.id}`
+      `${targetElem.className} ${cn(El.ClonedItems)} ul #${item.id}`
     );
 
     let indexOfRearrangedItem: number | null = null;
