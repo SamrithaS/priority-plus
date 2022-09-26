@@ -149,7 +149,6 @@ function priorityPlus(
    * Generates classes based on an element name.
    */
   function cn(key: El): string {
-    console.log(classNames, key);
     return classNames[key].join(" ");
   }
 
@@ -251,9 +250,6 @@ function priorityPlus(
     ) as HTMLElement;
     el.primary[El.ToggleBtn] = original.querySelector(
       `[${dv(El.ToggleBtn)}]`
-    ) as HTMLElement;
-    el.primary[El.SelectedItem] = original.querySelector(
-      `${cn(El.SelectedItem)}`
     ) as HTMLElement;
 
     el.clone[El.Main] = cloned.querySelector(`[${dv(El.Main)}]`) as HTMLElement;
@@ -475,6 +471,9 @@ function priorityPlus(
       el?.primary?.[El.PrimaryNav]?.children
     ).concat(Array.from(el?.primary[El.OverflowNav]?.children));
 
+    el.primary[El.SelectedItem] = document.querySelector(
+      `.${cn(El.SelectedItem)}`
+    ) as HTMLElement;
     if (options.showSelectedMenuItem) {
       if (el.primary[El.SelectedItem])
         rearrangeSelectedItem(el.primary[El.SelectedItem]);
@@ -544,10 +543,6 @@ function priorityPlus(
 
     const clonedItems = document.querySelector(
       `${targetElem.className} ${cn(El.ClonedItems)} ul`
-    );
-    console.log(
-      `${targetElem.className} ${cn(El.ClonedItems)} ul #${item.id}`,
-      item
     );
     const itemToRemove = document.querySelector(
       `${targetElem.className} ${cn(El.ClonedItems)} ul #${item.id}`
