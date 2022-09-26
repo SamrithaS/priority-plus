@@ -72,6 +72,7 @@ interface Options {
     [El.ToggleBtn]: string[];
     [El.NavItems]: string[];
     [El.SelectedItem]: string[];
+    [El.ClonedItems]: string[];
   };
   collapseAtCount: number;
   defaultOverflowVisible: boolean;
@@ -90,6 +91,7 @@ const defaultOptions: Options = {
     [El.ToggleBtn]: ["p-plus__toggle-btn"],
     [El.NavItems]: ["p-plus__primary-nav-item"],
     [El.SelectedItem]: ["current-menu-item"],
+    [El.ClonedItems]: ["p-plus--clone"],
   },
   collapseAtCount: -1,
   openOnToggle: true,
@@ -147,6 +149,7 @@ function priorityPlus(
    * Generates classes based on an element name.
    */
   function cn(key: El): string {
+    console.log(classNames, key);
     return classNames[key].join(" ");
   }
 
@@ -539,7 +542,13 @@ function priorityPlus(
       el?.primary?.[El.PrimaryNav]?.children
     ).concat(Array.from(el?.primary[El.OverflowNav]?.children));
 
-    const clonedItems = document.querySelector(`${targetElem.className} ${cn(El.ClonedItems)} ul`);
+    const clonedItems = document.querySelector(
+      `${targetElem.className} ${cn(El.ClonedItems)} ul`
+    );
+    console.log(
+      `${targetElem.className} ${cn(El.ClonedItems)} ul #${item.id}`,
+      item
+    );
     const itemToRemove = document.querySelector(
       `${targetElem.className} ${cn(El.ClonedItems)} ul #${item.id}`
     );
