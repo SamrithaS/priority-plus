@@ -542,10 +542,10 @@ function priorityPlus(
     ).concat(Array.from(el?.primary[El.OverflowNav]?.children));
 
     const clonedItems = document.querySelector(
-      `${targetElem.className} ${cn(El.ClonedItems)} ul`
+      `.${cn(El.Container)} .${cn(El.ClonedItems)} ul`
     );
     const itemToRemove = document.querySelector(
-      `${targetElem.className} ${cn(El.ClonedItems)} ul #${item.id}`
+      `.${cn(El.Container)} .${cn(El.ClonedItems)} ul #${item.id}`
     );
 
     let indexOfRearrangedItem: number | null = null;
@@ -566,12 +566,13 @@ function priorityPlus(
       }
     });
     item.classList.add(`${cn(El.SelectedItem)}`);
+
     if (
       Array.from(el.primary[El.OverflowNav]?.children).includes(item) &&
       Array.from(el.primary[El.PrimaryNav]?.children).length
     ) {
       el.primary[El.OverflowNav].removeChild(item);
-      if (itemToRemove && item.innerHTML.length > 30) {
+      if (itemToRemove) {
         clonedItems?.removeChild(itemToRemove);
         clonedItems?.insertBefore(
           itemToRemove,
